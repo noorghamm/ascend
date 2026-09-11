@@ -8,6 +8,8 @@ function SessionForm() {
     duration_minutes: 60,
   });
 
+   const [submitted, setSubmitted] = useState(false);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -21,10 +23,20 @@ function SessionForm() {
   });
   const data = await res.json();
   console.log(res.status, data);
+  if (res.ok) {
+    setSubmitted(true);
+    setForm({
+  email: "",
+  display_name: "",
+  zone: "group",
+  duration_minutes: 60,
+});
+}
 };
 
   return (
     <form onSubmit={handleSubmit}>
+        {submitted && <p>Check your email for the verify link!</p>}
       <input
         name="email"
         value={form.email}
