@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import SessionList from "./components/SessionList";
 import ZoneFilter from "./components/ZoneFilter";
+import SessionForm from "./components/SessionForm";
 const API = "http://127.0.0.1:8000/api";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
     <div>
       <h1>Ascend</h1>
       <p>Find your level.</p>
+      <SessionForm />
       <ZoneFilter zone={zone} onZoneChange={setZone} />
       <SessionList sessions={visibleSessions} />
     </div>
