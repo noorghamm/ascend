@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function SessionForm() {
+function SessionForm({ onCreated }) {
   const [form, setForm] = useState({
     email: "",
     display_name: "",
@@ -24,6 +24,7 @@ function SessionForm() {
     });
     const data = await res.json();
     if (res.ok) {
+        onCreated();
       setSubmitted(true);
       setErrors({});
       setForm({

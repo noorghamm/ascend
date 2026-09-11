@@ -8,10 +8,14 @@ function App() {
   const [sessions, setSessions] = useState([]);
   const [zone, setZone] = useState("all");
 
-  useEffect(() => {
+  const loadSessions = () => {
     fetch(`${API}/sessions/`)
       .then((res) => res.json())
       .then((data) => setSessions(data));
+  };
+
+  useEffect(() => {
+    loadSessions();
   }, []);
 
   const visibleSessions =
@@ -21,7 +25,7 @@ function App() {
     <div>
       <h1>Ascend</h1>
       <p>Find your level.</p>
-      <SessionForm />
+      <SessionForm onCreated={loadSessions} />
       <ZoneFilter zone={zone} onZoneChange={setZone} />
       <SessionList sessions={visibleSessions} />
     </div>
