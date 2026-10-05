@@ -1,63 +1,37 @@
-/* Ascend — techy minimalist. Mono for data, sans for prose, one teal accent,
-   zone colours only ever appear on pills/dots. */
+/* Ascend — techy minimalist, dark only. Mono for data, sans for prose, one teal
+   accent, zone colours only ever appear on pills/dots. */
 
 :root {
-  --bg: #f6f7f9;
-  --surface: #ffffff;
-  --surface-2: #eef0f3;
-  --text: #15181e;
-  --text-2: #5c6470;
-  --text-3: #8b929d;
-  --border: #e1e4e9;
-  --border-2: #cfd4db;
-  --accent: #0d9488;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(13, 148, 136, 0.12);
-  --focus: rgba(13, 148, 136, 0.35);
-  --ok: #0d9488;
-  --err: #d6453d;
+  --bg: #0f1115;
+  --surface: #161920;
+  --surface-2: #1d212a;
+  --text: #e8eaee;
+  --text-2: #a4abb6;
+  --text-3: #6f7784;
+  --border: #262b35;
+  --border-2: #343a46;
+  --accent: #5eead4;
+  --accent-ink: #0b1511;
+  --accent-soft: rgba(94, 234, 212, 0.12);
+  --focus: rgba(94, 234, 212, 0.35);
+  --ok: #5eead4;
+  --err: #f87171;
 
-  --green: #16a34a;
-  --amber: #d97706;
-  --red: #dc2626;
-  --green-soft: rgba(22, 163, 74, 0.12);
-  --amber-soft: rgba(217, 119, 6, 0.14);
-  --red-soft: rgba(220, 38, 38, 0.12);
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --green-soft: rgba(74, 222, 128, 0.14);
+  --amber-soft: rgba(251, 191, 36, 0.14);
+  --red-soft: rgba(248, 113, 113, 0.14);
 
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   --r: 10px;
   --r-sm: 6px;
-  --shadow: 0 1px 2px rgba(16, 20, 28, 0.05), 0 8px 24px -16px rgba(16, 20, 28, 0.25);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -18px rgba(0, 0, 0, 0.8);
 
-  color-scheme: light dark;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f1115;
-    --surface: #161920;
-    --surface-2: #1d212a;
-    --text: #e8eaee;
-    --text-2: #a4abb6;
-    --text-3: #6f7784;
-    --border: #262b35;
-    --border-2: #343a46;
-    --accent: #5eead4;
-    --accent-ink: #0b1511;
-    --accent-soft: rgba(94, 234, 212, 0.12);
-    --focus: rgba(94, 234, 212, 0.35);
-    --ok: #5eead4;
-    --err: #f87171;
-    --green: #4ade80;
-    --amber: #fbbf24;
-    --red: #f87171;
-    --green-soft: rgba(74, 222, 128, 0.14);
-    --amber-soft: rgba(251, 191, 36, 0.14);
-    --red-soft: rgba(248, 113, 113, 0.14);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 30px -18px rgba(0, 0, 0, 0.8);
-  }
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -203,7 +177,7 @@ select {
 }
 .seg-opt input { position: absolute; opacity: 0; width: 0; height: 0; }
 .seg-opt:hover { color: var(--text); }
-.seg-on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.seg-on { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.3); }
 .seg-opt:has(input:focus-visible) { box-shadow: 0 0 0 2px var(--focus); }
 
 .btn {
