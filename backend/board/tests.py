@@ -160,8 +160,26 @@ class ResendBackendTests(TestCase):
 
 class SpaRouteTests(TestCase):
     def test_spa_404s_when_not_built(self):
+        from django.http import Http404
+        from django.test import RequestFactory
+        from config.urls import spa
+
         with self.settings(FRONTEND_DIST=settings.BASE_DIR / "nope"):
-            self.assertEqual(self.client.get("/").status_code, 404)
+            with self.assertRaises(Http404):
+                spa(RequestFactory().get("/"))
+
+    def test_spa_serves_index_when_built(self):
+        import tempfile
+        from pathlib import Path
+        from django.test import RequestFactory
+        from config.urls import spa
+
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "index.html").write_text("<!doctype html><title>Ascend</title>")
+            with self.settings(FRONTEND_DIST=Path(d)):
+                res = spa(RequestFactory().get("/anything"))
+                self.assertEqual(res.status_code, 200)
+                self.assertIn(b"Ascend", b"".join(res.streaming_content))
 
     def test_api_routes_untouched(self):
         self.assertEqual(self.client.get("/api/sessions/").status_code, 200)

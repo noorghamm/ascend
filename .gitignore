@@ -9,3 +9,5 @@ dist/
 
 .vscode/
 .DS_Store
+backend/frontend_dist/
+backend/staticfiles/
