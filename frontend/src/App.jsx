@@ -3,8 +3,10 @@ import SessionList from "./components/SessionList";
 import ZoneFilter from "./components/ZoneFilter";
 import SessionForm from "./components/SessionForm";
 import Toast from "./components/Toast";
-import { fetchSessions } from "./api";
-import { addMine, loadMine } from "./mine";
+import HowItWorks from "./components/HowItWorks";
+import { extendSession, fetchSessions, leaveSession } from "./api";
+import { addMine, isMine, keyFor, loadMine, removeMine } from "./mine";
+import { dismissHowto, howtoDismissed } from "./prefs";
 import { clearPending, loadPending, savePending } from "./pending";
 
 const POLL_MS = 30_000;
@@ -41,6 +43,8 @@ function App() {
     flash.verifiedId || flash.toast?.kind === "err" ? clearPending() : loadPending()
   );
   const [formOpen, setFormOpen] = useState(false);
+  const [showHowto, setShowHowto] = useState(() => !howtoDismissed());
+  const [busyId, setBusyId] = useState(null);
 
   const loadSessions = useCallback(() =>
     fetchSessions()
@@ -84,18 +88,49 @@ function App() {
 
   // Own posts first within each zone; otherwise API order (newest first).
   const ordered = useMemo(
-    () => [...live].sort((a, b) => Number(mine.has(b.id)) - Number(mine.has(a.id))),
+    () => [...live].sort((a, b) => Number(isMine(mine, b.id)) - Number(isMine(mine, a.id))),
     [live, mine]
   );
 
   const handleCreated = (created) => {
     // Remember the post now so it's tagged "You" the moment it goes live.
     if (created?.id) {
-      setMine(addMine(created.id));
+      setMine(addMine(created.id, created.owner_key));
       setPending(savePending(created));
     }
     setToast({ kind: "ok", text: "Posted. Check your email to go live." });
     setFormOpen(false);
+  };
+
+  const handleLeave = async (s) => {
+    if (!window.confirm("Take your post off the board?")) return;
+    setBusyId(s.id);
+    const { ok, data } = await leaveSession(s.id, keyFor(mine, s.id));
+    setBusyId(null);
+    if (ok) {
+      setMine(removeMine(s.id));
+      setSessions((list) => list.filter((x) => x.id !== s.id));
+      setToast({ kind: "ok", text: "Post removed. See you next time." });
+    } else {
+      setToast({ kind: "err", text: data?.detail ?? "Couldn't remove the post." });
+    }
+  };
+
+  const handleExtend = async (s) => {
+    setBusyId(s.id);
+    const { ok, data } = await extendSession(s.id, keyFor(mine, s.id));
+    setBusyId(null);
+    if (ok) {
+      setSessions((list) => list.map((x) => (x.id === s.id ? data : x)));
+      setToast({ kind: "ok", text: "Extended by 30 minutes." });
+    } else {
+      setToast({ kind: "err", text: data?.detail ?? "Couldn't extend the post." });
+    }
+  };
+
+  const closeHowto = () => {
+    dismissHowto();
+    setShowHowto(false);
   };
 
   return (
@@ -118,6 +153,8 @@ function App() {
         </div>
       </header>
 
+      {showHowto && <HowItWorks onDismiss={closeHowto} />}
+
       <main className="layout">
         <aside className={`side${formOpen ? " side-open" : ""}`}>
           <div className="panel">
@@ -136,12 +173,27 @@ function App() {
               Can't reach the API ({loadError}). Is the backend running?
             </div>
           )}
-          <SessionList sessions={ordered} zone={zone} now={now} mine={mine} pending={pendingDone ? null : pending} />
+          <SessionList
+            sessions={ordered}
+            zone={zone}
+            now={now}
+            mine={mine}
+            pending={pendingDone ? null : pending}
+            onLeave={handleLeave}
+            onExtend={handleExtend}
+            busyId={busyId}
+          />
         </section>
       </main>
 
       <footer className="foot muted">
         Posts expire automatically. Nothing is stored beyond your name, zone and note.
+        {!showHowto && (
+          <>
+            {" · "}
+            <button type="button" className="link" onClick={() => setShowHowto(true)}>How it works</button>
+          </>
+        )}
       </footer>
     </div>
   );

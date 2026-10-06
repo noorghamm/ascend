@@ -183,3 +183,69 @@ class SpaRouteTests(TestCase):
 
     def test_api_routes_untouched(self):
         self.assertEqual(self.client.get("/api/sessions/").status_code, 200)
+
+
+class OwnerActionTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        common = {k: v for k, v in payload().items() if k not in ("start_time", "duration_minutes")}
+        self.s = Session.objects.create(
+            is_verified=True, start_time=timezone.now(), duration_minutes=60, **common
+        )
+        self.key = str(self.s.verify_token)
+
+    def test_create_returns_owner_key_once(self):
+        res = self.client.post("/api/sessions/", payload(email="other1@student.gla.ac.uk"), format="json")
+        self.assertEqual(res.status_code, 201)
+        key = res.json()["owner_key"]
+        self.assertEqual(key, str(Session.objects.get(pk=res.json()["id"]).verify_token))
+        # Not exposed on the board.
+        Session.objects.filter(pk=res.json()["id"]).update(is_verified=True)
+        for row in self.client.get("/api/sessions/").json():
+            self.assertNotIn("owner_key", row)
+            self.assertNotIn("verify_token", row)
+
+    def test_leave_requires_key(self):
+        res = self.client.post(f"/api/sessions/{self.s.id}/leave/", {"owner_key": "nope"}, format="json")
+        self.assertEqual(res.status_code, 403)
+        self.assertTrue(Session.objects.filter(pk=self.s.pk).exists())
+
+    def test_leave_deletes_with_key(self):
+        res = self.client.post(f"/api/sessions/{self.s.id}/leave/", {"owner_key": self.key}, format="json")
+        self.assertEqual(res.status_code, 204)
+        self.assertFalse(Session.objects.filter(pk=self.s.pk).exists())
+
+    def test_extend_adds_30_minutes(self):
+        before = self.s.end_time
+        res = self.client.post(f"/api/sessions/{self.s.id}/extend/", {"owner_key": self.key}, format="json")
+        self.assertEqual(res.status_code, 200)
+        self.s.refresh_from_db()
+        self.assertEqual(self.s.end_time, before + timedelta(minutes=30))
+        self.assertEqual(self.s.duration_minutes, 90)
+
+    def test_extend_capped_at_six_hours(self):
+        self.s.duration_minutes = 360
+        self.s.save()
+        res = self.client.post(f"/api/sessions/{self.s.id}/extend/", {"owner_key": self.key}, format="json")
+        self.assertEqual(res.status_code, 400)
+
+    def test_extend_wrong_key(self):
+        res = self.client.post(f"/api/sessions/{self.s.id}/extend/", {"owner_key": "x"}, format="json")
+        self.assertEqual(res.status_code, 403)
+
+
+class AdminStatsTests(TestCase):
+    def test_stats_page_renders_for_staff(self):
+        from django.contrib.auth.models import User
+        User.objects.create_superuser("admin", "a@b.c", "pw")
+        self.client.login(username="admin", password="pw")
+        common = {k: v for k, v in payload().items() if k not in ("start_time", "duration_minutes")}
+        Session.objects.create(is_verified=True, start_time=timezone.now(), duration_minutes=60, **common)
+        res = self.client.get("/admin/board/session/stats/")
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, "verify rate")
+        self.assertContains(res, "Group study")
+
+    def test_stats_requires_login(self):
+        res = self.client.get("/admin/board/session/stats/")
+        self.assertEqual(res.status_code, 302)

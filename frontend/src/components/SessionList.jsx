@@ -1,7 +1,8 @@
 import SessionCard from "./SessionCard";
 import { ZONES, levelsLabel } from "../zones";
+import { isMine, keyFor } from "../mine";
 
-function SessionList({ sessions, zone, now, mine, pending }) {
+function SessionList({ sessions, zone, now, mine, pending, onLeave, onExtend, busyId }) {
   if (sessions.length === 0 && !pending) {
     return (
       <div className="empty">
@@ -34,7 +35,16 @@ function SessionList({ sessions, zone, now, mine, pending }) {
             <div className="cards">
               {p && <SessionCard key="pending" session={p} now={now} pending />}
               {items.map((s) => (
-                <SessionCard key={s.id} session={s} now={now} mine={mine.has(s.id)} />
+                <SessionCard
+                  key={s.id}
+                  session={s}
+                  now={now}
+                  mine={isMine(mine, s.id)}
+                  canAct={Boolean(keyFor(mine, s.id))}
+                  busy={busyId === s.id}
+                  onLeave={() => onLeave(s)}
+                  onExtend={() => onExtend(s)}
+                />
               ))}
             </div>
           )}

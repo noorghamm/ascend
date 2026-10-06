@@ -63,7 +63,7 @@ to your real domain.
 ```bash
 backend/.venv/bin/python backend/manage.py test            # API tests
 backend/.venv/bin/python backend/manage.py purge_sessions  # delete expired / stale rows
-backend/.venv/bin/python backend/manage.py createsuperuser # for /admin/
+backend/.venv/bin/python backend/manage.py createsuperuser # for /admin/ (stats at /admin/board/session/stats/)
 cd frontend && npm run lint
 ```
 
@@ -72,7 +72,9 @@ cd frontend && npm run lint
 | Method | Path                     | What                                   |
 | ------ | ------------------------ | -------------------------------------- |
 | GET    | `/api/sessions/`         | Live, verified posts (newest first)    |
-| POST   | `/api/sessions/`         | Create a post; sends the verify email  |
+| POST   | `/api/sessions/`         | Create a post; sends the verify email. Response includes `owner_key` once |
+| POST   | `/api/sessions/<id>/extend/` | `{owner_key}` → +30 min, max 6 h total |
+| POST   | `/api/sessions/<id>/leave/`  | `{owner_key}` → removes the post       |
 | GET    | `/verify/<token>/`       | Marks the post live, redirects to app  |
 | GET    | `/remove/<token>/`       | Deletes the post, redirects to app     |
 

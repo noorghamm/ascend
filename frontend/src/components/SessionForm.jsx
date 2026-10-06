@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createSession } from "../api";
 import { ZONES, ZONE_BY_KEY, levelsLabel } from "../zones";
+import { loadFormPrefs, saveFormPrefs } from "../prefs";
 
 const DURATIONS = [30, 60, 90, 120, 150, 180, 240, 300, 360];
 const fmtDuration = (m) => (m < 60 ? `${m} min` : m % 60 ? `${m / 60} h` : `${m / 60} h`);
@@ -16,7 +17,7 @@ const EMPTY = {
 };
 
 function SessionForm({ onCreated }) {
-  const [form, setForm] = useState(EMPTY);
+  const [form, setForm] = useState(() => ({ ...EMPTY, ...loadFormPrefs() }));
   const [status, setStatus] = useState("idle"); // idle | sending | sent
   const [errors, setErrors] = useState({});
 
@@ -44,9 +45,10 @@ function SessionForm({ onCreated }) {
     };
     const { ok, data } = await createSession(body);
     if (ok) {
+      saveFormPrefs(form);
       onCreated(data);
       setErrors({});
-      setForm(EMPTY);
+      setForm({ ...EMPTY, email: form.email, display_name: form.display_name });
       setStatus("sent");
     } else {
       setErrors(data);

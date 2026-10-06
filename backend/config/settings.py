@@ -129,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
@@ -150,7 +150,7 @@ WHITENOISE_ROOT = FRONTEND_DIST if FRONTEND_DIST.exists() else None
 WHITENOISE_INDEX_FILE = True
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"},
 }
 
 # Default primary key field type

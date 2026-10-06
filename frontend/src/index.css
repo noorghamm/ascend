@@ -224,6 +224,33 @@ select {
 .toast-x:hover { opacity: 1; }
 @keyframes drop { from { opacity: 0; transform: translate(-50%, -8px); } }
 
+/* ---------- how it works ---------- */
+
+.howto {
+  display: flex; align-items: center; gap: 20px;
+  margin-top: 18px; padding: 14px 18px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r);
+}
+.howto-steps {
+  list-style: none; margin: 0; padding: 0; flex: 1;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px;
+}
+.howto-steps li { display: flex; gap: 10px; align-items: flex-start; }
+.howto-steps b { font-size: 13.5px; display: block; }
+.howto-steps p { font-size: 12.5px; color: var(--text-2); line-height: 1.4; }
+.howto-n {
+  flex: none; width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  background: var(--accent-soft); color: var(--accent);
+}
+.howto-x {
+  font: inherit; font-size: 12.5px; font-weight: 500; white-space: nowrap;
+  background: none; border: 1px solid var(--border-2); color: var(--text-2);
+  padding: 6px 12px; border-radius: var(--r-sm); cursor: pointer;
+}
+.howto-x:hover { color: var(--text); border-color: var(--text-3); }
+
 /* ---------- board ---------- */
 
 .board { min-width: 0; }
@@ -310,6 +337,22 @@ select {
 .card-note { font-size: 13.5px; color: var(--text); line-height: 1.45; overflow-wrap: anywhere; }
 .card-contact { font-size: 13px; font-family: var(--mono); overflow-wrap: anywhere; }
 
+.card-actions {
+  display: flex; gap: 8px; margin-top: 2px; padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+.btn-ghost {
+  font: inherit; font-size: 12.5px; font-weight: 500;
+  background: var(--surface-2); color: var(--text-2);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 6px 10px; cursor: pointer; flex: 1;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.btn-ghost:hover:not(:disabled) { color: var(--accent); border-color: var(--accent); }
+.btn-ghost-danger:hover:not(:disabled) { color: var(--err); border-color: var(--err); }
+.btn-ghost:disabled { opacity: .45; cursor: default; }
+.btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+
 .empty {
   text-align: center; padding: 56px 20px;
   border: 1px dashed var(--border-2); border-radius: var(--r);
@@ -334,6 +377,9 @@ select {
 /* ---------- responsive ---------- */
 
 @media (max-width: 860px) {
+  .howto { flex-direction: column; align-items: stretch; gap: 14px; }
+  .howto-steps { grid-template-columns: 1fr; gap: 12px; }
+  .howto-x { align-self: flex-end; }
   .layout { grid-template-columns: 1fr; gap: 20px; padding-top: 18px; }
   .side { position: static; display: none; }
   .side-open { display: block; }

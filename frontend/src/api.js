@@ -15,3 +15,17 @@ export async function createSession(body) {
   const data = await res.json().catch(() => ({}));
   return { ok: res.ok, data };
 }
+
+async function ownerAction(id, action, ownerKey) {
+  const res = await fetch(`${API}/sessions/${id}/${action}/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ owner_key: ownerKey }),
+  });
+  if (res.status === 204) return { ok: true, data: null };
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, data };
+}
+
+export const leaveSession = (id, key) => ownerAction(id, "leave", key);
+export const extendSession = (id, key) => ownerAction(id, "extend", key);

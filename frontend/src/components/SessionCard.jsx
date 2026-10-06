@@ -14,9 +14,10 @@ function remaining(endIso, now) {
   return `${h}h ${m}m left`;
 }
 
-function SessionCard({ session, now, mine, pending = false }) {
+function SessionCard({ session, now, mine, pending = false, canAct = false, onLeave, onExtend, busy }) {
   const left = remaining(session.end_time, now);
   const endingSoon = new Date(session.end_time) - now < 20 * 60000;
+  const canExtend = session.duration_minutes + 30 <= 360;
 
   return (
     <article className={`card${mine ? " card-mine" : ""}${pending ? " card-pending" : ""}`}>
@@ -37,6 +38,18 @@ function SessionCard({ session, now, mine, pending = false }) {
       {session.contact && (
         <div className="card-contact">
           <span className="muted">Contact</span> {session.contact}
+        </div>
+      )}
+
+      {mine && !pending && canAct && (
+        <div className="card-actions">
+          <button type="button" className="btn-ghost" onClick={onExtend} disabled={busy || !canExtend}
+            title={canExtend ? "Stay another 30 minutes" : "Posts can't run longer than 6 hours"}>
+            +30 min
+          </button>
+          <button type="button" className="btn-ghost btn-ghost-danger" onClick={onLeave} disabled={busy}>
+            I'm leaving
+          </button>
         </div>
       )}
     </article>
