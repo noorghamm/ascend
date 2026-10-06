@@ -5,6 +5,7 @@ import SessionForm from "./components/SessionForm";
 import Toast from "./components/Toast";
 import { fetchSessions } from "./api";
 import { addMine, loadMine } from "./mine";
+import { clearPending, loadPending, savePending } from "./pending";
 
 const POLL_MS = 30_000;
 
@@ -35,6 +36,10 @@ function App() {
     flash.verifiedId ? addMine(flash.verifiedId) : loadMine()
   );
   const [toast, setToast] = useState(flash.toast);
+  // A post submitted from this browser that hasn't been verified yet.
+  const [pending, setPending] = useState(() =>
+    flash.verifiedId || flash.toast?.kind === "err" ? clearPending() : loadPending()
+  );
   const [formOpen, setFormOpen] = useState(false);
 
   const loadSessions = useCallback(() =>
@@ -43,6 +48,8 @@ function App() {
         setSessions(data);
         setLoadError(null);
         setNow(new Date());
+        // Pending post now live on the board? Drop the placeholder.
+        setPending((p) => (p && data.some((s) => s.id === p.id) ? clearPending() : p));
       })
       .catch((e) => setLoadError(e.message)),
   []);
@@ -66,6 +73,9 @@ function App() {
 
   const live = useMemo(() => sessions.filter((s) => new Date(s.end_time) > now), [sessions, now]);
 
+  // Hide the placeholder once its post has expired; the poll clears it once verified.
+  const pendingDone = pending && new Date(pending.end_time) <= now;
+
   const counts = useMemo(() => {
     const c = { all: live.length };
     for (const s of live) c[s.zone] = (c[s.zone] ?? 0) + 1;
@@ -80,7 +90,10 @@ function App() {
 
   const handleCreated = (created) => {
     // Remember the post now so it's tagged "You" the moment it goes live.
-    if (created?.id) setMine(addMine(created.id));
+    if (created?.id) {
+      setMine(addMine(created.id));
+      setPending(savePending(created));
+    }
     setToast({ kind: "ok", text: "Posted. Check your email to go live." });
     setFormOpen(false);
   };
@@ -123,7 +136,7 @@ function App() {
               Can't reach the API ({loadError}). Is the backend running?
             </div>
           )}
-          <SessionList sessions={ordered} zone={zone} now={now} mine={mine} />
+          <SessionList sessions={ordered} zone={zone} now={now} mine={mine} pending={pendingDone ? null : pending} />
         </section>
       </main>
 

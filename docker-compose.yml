@@ -1,0 +1,15 @@
+# Production-style single container. `docker compose up -d` on any VPS.
+services:
+  ascend:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: backend/.env
+    environment:
+      DJANGO_DEBUG: "0"
+    volumes:
+      - ascend-data:/data
+    restart: unless-stopped
+
+volumes:
+  ascend-data:

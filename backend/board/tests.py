@@ -1,3 +1,4 @@
+from django.conf import settings
 from datetime import timedelta
 
 from django.core import mail
@@ -123,3 +124,44 @@ class TokenLinkTests(TestCase):
     def test_unknown_token_404s(self):
         import uuid
         self.assertEqual(self.client.get(reverse("verify", args=[uuid.uuid4()])).status_code, 404)
+
+
+class ResendBackendTests(TestCase):
+    def test_posts_to_resend_api(self):
+        import json
+        from unittest import mock
+        from django.core.mail import EmailMessage
+        from board.email import ResendEmailBackend
+
+        captured = {}
+
+        class FakeResponse:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, *a): return False
+
+        def fake_urlopen(req, timeout):
+            captured["url"] = req.full_url
+            captured["auth"] = req.get_header("Authorization")
+            captured["body"] = json.loads(req.data)
+            return FakeResponse()
+
+        with self.settings(RESEND_API_KEY="re_test", DEFAULT_FROM_EMAIL="Ascend <a@b.c>"):
+            with mock.patch("urllib.request.urlopen", fake_urlopen):
+                n = ResendEmailBackend().send_messages(
+                    [EmailMessage("Subj", "Body", None, ["x@student.gla.ac.uk"])]
+                )
+        self.assertEqual(n, 1)
+        self.assertEqual(captured["url"], "https://api.resend.com/emails")
+        self.assertEqual(captured["auth"], "Bearer re_test")
+        self.assertEqual(captured["body"]["to"], ["x@student.gla.ac.uk"])
+        self.assertEqual(captured["body"]["subject"], "Subj")
+
+
+class SpaRouteTests(TestCase):
+    def test_spa_404s_when_not_built(self):
+        with self.settings(FRONTEND_DIST=settings.BASE_DIR / "nope"):
+            self.assertEqual(self.client.get("/").status_code, 404)
+
+    def test_api_routes_untouched(self):
+        self.assertEqual(self.client.get("/api/sessions/").status_code, 200)

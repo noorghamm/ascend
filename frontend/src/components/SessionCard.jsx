@@ -14,16 +14,16 @@ function remaining(endIso, now) {
   return `${h}h ${m}m left`;
 }
 
-function SessionCard({ session, now, mine }) {
+function SessionCard({ session, now, mine, pending = false }) {
   const left = remaining(session.end_time, now);
   const endingSoon = new Date(session.end_time) - now < 20 * 60000;
 
   return (
-    <article className={`card${mine ? " card-mine" : ""}`}>
+    <article className={`card${mine ? " card-mine" : ""}${pending ? " card-pending" : ""}`}>
       <header className="card-head">
         <div className="card-title">
           <strong>{session.display_name}</strong>
-          {mine && <span className="tag-you">You</span>}
+          {pending ? <span className="tag-pending">Check your email</span> : mine && <span className="tag-you">You</span>}
         </div>
         <ZoneBadge zone={session.zone} level={session.level} />
       </header>

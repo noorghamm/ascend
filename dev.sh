@@ -26,7 +26,7 @@ trap 'kill 0' EXIT INT TERM
 echo
 echo "  Ascend is up:"
 echo "    board  →  http://localhost:5173"
-echo "    api    →  http://127.0.0.1:8000/api/sessions/"
+echo "    api    →  http://localhost:5173/api/sessions/  (proxied to :8000)"
 echo "    admin  →  http://127.0.0.1:8000/admin/"
 echo "  Verify emails print in this terminal (no SMTP configured)."
 echo

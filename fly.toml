@@ -1,0 +1,27 @@
+# fly launch --copy-config --no-deploy && fly volumes create ascend_data --size 1 && fly deploy
+app = "ascend-glasgow"
+primary_region = "lhr"
+
+[build]
+
+[env]
+  DJANGO_DEBUG = "0"
+  DJANGO_ALLOWED_HOSTS = "ascend-glasgow.fly.dev"
+  BACKEND_URL = "https://ascend-glasgow.fly.dev"
+  FRONTEND_URL = "https://ascend-glasgow.fly.dev"
+  DATABASE_PATH = "/data/db.sqlite3"
+
+[[mounts]]
+  source = "ascend_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

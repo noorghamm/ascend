@@ -281,6 +281,14 @@ select {
 .card:hover { border-color: var(--border-2); }
 .card-mine { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
+.card-pending { opacity: .55; border-style: dashed; }
+.card-pending:hover { border-color: var(--border); }
+.tag-pending {
+  font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: .04em;
+  background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border-2);
+  padding: 2px 6px; border-radius: 4px; flex: none; white-space: nowrap;
+}
+
 .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .card-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .card-title strong { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

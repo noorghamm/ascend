@@ -21,9 +21,42 @@ That creates a virtualenv, installs everything, runs migrations, and starts
 both servers. Open http://localhost:5173. Verification emails are printed to
 the same terminal; click the `/verify/...` link to go live.
 
-Config lives in `backend/.env` and `frontend/.env` (both created from the
-`.env.example` files on first run). To send real email, set the `EMAIL_*`
-variables in `backend/.env`.
+Config lives in `backend/.env` (created from `.env.example` on first run).
+The frontend talks to `/api`, which Vite proxies to Django in development.
+
+## Email
+
+Three modes, picked by what's set in `backend/.env`:
+
+| Set                | Sends via                              |
+| ------------------ | -------------------------------------- |
+| nothing            | printed to the terminal (development)  |
+| `RESEND_API_KEY`   | [Resend](https://resend.com) HTTP API  |
+| `EMAIL_HOST` etc.  | plain SMTP                             |
+
+For Resend: sign up, verify a domain, create an API key, then set
+`RESEND_API_KEY` and `DEFAULT_FROM_EMAIL=Ascend <ascend@yourdomain>`.
+
+## Deploy
+
+One container runs Django under gunicorn and serves the built React app.
+SQLite lives on a volume at `/data`.
+
+```bash
+# Any VPS with Docker:
+cp backend/.env.example backend/.env   # fill in SECRET_KEY, URLs, email
+docker compose up -d --build           # http://<host>:8000, put Caddy/nginx in front for TLS
+
+# Fly.io:
+fly launch --copy-config --no-deploy
+fly volumes create ascend_data --size 1 --region lhr
+fly secrets set DJANGO_SECRET_KEY=$(openssl rand -hex 32) RESEND_API_KEY=re_... DEFAULT_FROM_EMAIL="Ascend <ascend@yourdomain>"
+fly deploy
+```
+
+Edit the hostnames in `fly.toml` to match your app name. For a VPS set
+`BACKEND_URL`, `FRONTEND_URL` and `DJANGO_ALLOWED_HOSTS` in `backend/.env`
+to your real domain.
 
 ## Useful commands
 
